@@ -5,8 +5,6 @@ import { Button } from "@/components/ui/button"
 import { Radio } from "lucide-react"
 import { YOUTUBE_CHANNEL_ID } from "@/lib/youtube-config"
 
-const CHANNEL_ID = "UCxBvNxxxxxxxxxxx" // Reemplaza con tu ID de canal real
-
 export function LiveButton() {
   const [isLive, setIsLive] = useState(false)
   const [liveVideoId, setLiveVideoId] = useState<string | null>(null)
