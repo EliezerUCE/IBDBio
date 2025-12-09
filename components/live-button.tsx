@@ -1,58 +1,58 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
+import { useState, useEffect } from "react"
 import { Radio } from "lucide-react"
-import { YOUTUBE_CHANNEL_ID } from "@/lib/youtube-config"
 
-export function LiveButton() {
+export default function LiveButton() {
   const [isLive, setIsLive] = useState(false)
-  const [liveVideoId, setLiveVideoId] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [liveUrl, setLiveUrl] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    const checkLiveStatus = async () => {
+      try {
+        const response = await fetch("/api/youtube-live")
+        const data = await response.json()
+        setIsLive(data.isLive)
+        setLiveUrl(data.liveUrl)
+      } catch (error) {
+        console.error("Error checking live status:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    // Check immediately
     checkLiveStatus()
-    // Chequear cada 2 minutos
-    const interval = setInterval(checkLiveStatus, 120000)
+
+    // Poll every 30 seconds for live status
+    const interval = setInterval(checkLiveStatus, 30000)
     return () => clearInterval(interval)
   }, [])
 
-  async function checkLiveStatus() {
-    try {
-      const response = await fetch(`/api/youtube/live-status?channelId=${YOUTUBE_CHANNEL_ID}`)
-      const data = await response.json()
-
-      console.log("[v0] Live status check:", data)
-
-      setIsLive(data.isLive)
-      setLiveVideoId(data.videoId)
-    } catch (error) {
-      console.error("[v0] Error checking live status:", error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
   const handleClick = () => {
-    if (isLive && liveVideoId) {
-      window.open(`https://www.youtube.com/watch?v=${liveVideoId}`, "_blank")
+    if (isLive && liveUrl) {
+      window.open(liveUrl, "_blank")
     }
   }
 
   return (
-    <Button
+    <button
       onClick={handleClick}
-      disabled={!isLive || isLoading}
-      size="lg"
-      className="w-full h-14 text-lg font-semibold relative overflow-hidden disabled:opacity-50"
-      style={{
-        backgroundColor: isLive ? "var(--color-live)" : "var(--color-muted)",
-        color: isLive ? "white" : "var(--color-muted-foreground)",
-      }}
+      disabled={!isLive || loading}
+      className={`relative overflow-hidden rounded-lg px-8 py-4 font-bold transition-all ${
+        isLive
+          ? "cursor-pointer bg-accent text-accent-foreground shadow-lg hover:shadow-xl hover:scale-105"
+          : "cursor-not-allowed bg-muted text-muted-foreground opacity-50"
+      }`}
     >
-      {isLive && <span className="absolute inset-0 animate-pulse bg-white/20" />}
-      <Radio className={`mr-2 h-5 w-5 ${isLive ? "animate-pulse" : ""}`} />
-      {isLoading ? "Verificando..." : isLive ? "🔴 EN VIVO - Ver Ahora" : "En Vivo"}
-    </Button>
+      <div className="flex items-center justify-center gap-2">
+        <Radio className={`h-5 w-5 ${isLive ? "animate-pulse" : ""}`} />
+        <span>EN VIVO</span>
+      </div>
+      {isLive && (
+        <div className="absolute inset-0 -top-1 h-1 w-full bg-gradient-to-r from-transparent via-accent-foreground/50 to-transparent" />
+      )}
+    </button>
   )
 }
