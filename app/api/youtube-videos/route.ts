@@ -12,9 +12,7 @@ export async function GET() {
     // Search for recent uploads from the channel
     const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${CHANNEL_ID}&order=date&type=video&maxResults=2&key=${API_KEY}`
 
-    const searchResponse = await fetch(searchUrl, {
-      next: { revalidate: 3600 },
-    })
+    const searchResponse = await fetch(searchUrl, { next: { revalidate: 300 } })
     const searchData = await searchResponse.json()
 
     if (!searchData.items || searchData.items.length === 0) {

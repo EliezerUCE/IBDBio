@@ -12,9 +12,7 @@ export async function GET() {
     // Search for live broadcasts
     const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${CHANNEL_ID}&eventType=live&type=video&key=${API_KEY}`
 
-    const searchResponse = await fetch(searchUrl, {
-      next: { revalidate: 300 },
-    })
+    const searchResponse = await fetch(searchUrl, { next: { revalidate: 30 } })
     const searchData = await searchResponse.json()
 
     if (!searchData.items || searchData.items.length === 0) {
